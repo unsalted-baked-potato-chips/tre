@@ -12,7 +12,7 @@ int main(int argc, char ** argv){
         return 1;
     }
     
-    fopen(argv[1], "w+");
+    file = fopen(argv[1], "r+");
     if (!file){
         return 1;
     }
@@ -22,19 +22,21 @@ int main(int argc, char ** argv){
     rewind(file);
 
     buffer = (char *) malloc(file_sz+2);
-
     if (!buffer){
         goto ERR_main;
     }
+
+    fread(buffer, 1, file_sz+1, file);
     buffer[file_sz+1] = 0;
 
     initscr();
     cbreak();
     noecho();
 
-    mvaddstr(0,0, buffer);
-
+    addstr(buffer);
     refresh();
+    getch();
+
     endwin();
 
 
