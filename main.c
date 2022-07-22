@@ -3,6 +3,8 @@
 
 #include <curses.h>
 
+void editor();
+
 int main(int argc, char ** argv){
     FILE * file = NULL;
     char * buffer = NULL;
@@ -32,11 +34,13 @@ int main(int argc, char ** argv){
     initscr();
     cbreak();
     noecho();
+    keypad(stdscr,1);
 
     addstr(buffer);
-    refresh();
-    getch();
+    
+    editor();
 
+    refresh();
     endwin();
 
 
@@ -49,4 +53,34 @@ ERR_main:
     free(buffer);
     return 1;
 
+}
+
+void editor(){
+    int input;
+    int cury, curx;
+    while(1) {
+        input = getch();
+        cury = getcury(stdscr);
+        curx = getcurx(stdscr);
+        switch (input){
+            case KEY_END:
+                return;
+            case KEY_UP:
+                move(cury?cury-1:cury, curx);
+                refresh();
+                break;
+            case KEY_DOWN:
+                move(cury<getmaxy(stdscr)?cury+1:cury, curx);
+                refresh();
+                break;
+            case KEY_RIGHT:
+                move(cury, curx<getmaxx(stdscr)?curx+1:curx);
+                refresh();
+                break;
+            case KEY_LEFT:
+                move(cury, curx?curx-1:curx);
+                refresh();
+                break;
+        }
+    }
 }
