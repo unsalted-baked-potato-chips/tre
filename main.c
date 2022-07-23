@@ -3,6 +3,18 @@
 
 #include <curses.h>
 
+#define LINE_LEN_MIN 50
+
+struct line {
+    char * str;
+    size_t max;
+    struct line * next;
+    struct line * prev;
+};
+
+
+struct line * load_file(FILE *);
+
 void editor();
 
 int main(int argc, char ** argv){
@@ -23,26 +35,22 @@ int main(int argc, char ** argv){
     file_sz = ftell(file);
     rewind(file);
 
-    buffer = (char *) malloc(file_sz+2);
-    if (!buffer){
-        goto ERR_main;
-    }
-
-    fread(buffer, 1, file_sz+1, file);
-    buffer[file_sz+1] = 0;
+    struct line *file_line = load_file(file);
 
     initscr();
     cbreak();
     noecho();
     keypad(stdscr,1);
-
-    addstr(buffer);
+    for(int col = 0; file_line; file_line=file_line->next, col++){
+        move(col, 0);
+        addstr(file_line->str);
+        refresh();
+    }
     
     editor();
 
     refresh();
     endwin();
-
 
     fclose(file);
     free(buffer);
@@ -83,4 +91,43 @@ void editor(){
                 break;
         }
     }
+}
+struct line *read_line(FILE * file){
+    struct line *line = (struct line *) malloc(sizeof(struct line));
+    line->next = NULL;
+    line->prev = NULL;
+    line->max = LINE_LEN_MIN;
+    line->str = (char *) malloc(LINE_LEN_MIN);
+
+    while(!feof(file)){
+        ssize_t pos = 0;
+        size_t read = fread(line->str+pos, 1, LINE_LEN_MIN, file);
+        for (pos = 1;pos<read; pos++){
+            if (line->str[pos]== '\n'){
+                line->str[pos]=0;
+                fseek(file, pos-read, SEEK_CUR);
+                printf("%d, %d\n", pos, read);
+                return line;
+            }
+        }
+        line->max+=LINE_LEN_MIN;
+        realloc(line->str, line->max);
+    }
+    return NULL;
+}
+struct line * load_file(FILE * file){
+    struct line * prev = NULL;
+    struct line * curr = NULL;
+    
+    prev=read_line(file);
+    while(1){
+        curr = read_line(file);
+        if (prev)
+            prev->next=curr;
+        curr->prev = prev;
+        prev = curr;
+        if(!curr) break;    
+    }
+    for (prev=curr;curr;prev=curr, curr=curr->prev);
+    return prev;
 }
