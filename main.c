@@ -92,7 +92,7 @@ void editor(){
         }
     }
 }
-
+//TODO: handle nonl terminated files
 struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
     struct line *line = malloc(sizeof(struct line));
     line->str = malloc(LINE_LEN_MIN);
