@@ -3,7 +3,7 @@
 
 #include <curses.h>
 
-#define LINE_LEN_MIN 50
+#define LINE_LEN_MIN 5
 
 struct line {
     char * str;
@@ -98,15 +98,16 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
     line->str = malloc(LINE_LEN_MIN);
     line->prev = prev;
     line->max = LINE_LEN_MIN;
-
-    fread(line->str, 1, LINE_LEN_MIN, file);
+    
+    long chars_read = fread(line->str, 1, LINE_LEN_MIN, file);
     int i =0;
 
     while(1){
-        for (; i<line->max && line->str[i]!='\n'; i++);
-        if (i<line->max){ //nl found
-            fseek(file, i-line->max, SEEK_CUR);
-            if (ftell(file)==file_sz){
+        for (; i<chars_read && line->str[i]!='\n'; i++);
+        if (i<chars_read){ //nl found
+            fseek(file, i-chars_read, SEEK_CUR);
+            line->str[i] = 0;
+            if (ftell(file)+1==file_sz){
                 return NULL;
             }else {
                 fseek(file, 1, SEEK_CUR);
@@ -115,7 +116,8 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
             }
         }else {
             line->max+=LINE_LEN_MIN;
-            realloc(line->str, line->max);
+            line->str = realloc(line->str, line->max);
+            chars_read += fread(line->str+i, 1, LINE_LEN_MIN, file);
         }
 
     }
