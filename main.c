@@ -108,12 +108,12 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
             fseek(file, i-chars_read, SEEK_CUR);
             line->str[i] = 0;
             if (ftell(file)+1==file_sz){
-                return NULL;
+                line->next = NULL;
             }else {
                 fseek(file, 1, SEEK_CUR);
                 line->next = read_lines(file, file_sz, line);
-                return line;
             }
+            return line;
         }else {
             line->max+=LINE_LEN_MIN;
             line->str = realloc(line->str, line->max);
