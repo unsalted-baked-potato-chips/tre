@@ -45,6 +45,9 @@ int main(int argc, char ** argv){
         move(col, 0);
         addstr(file_line->str);
         refresh();
+        if (file_line->prev)
+            free(file_line->prev->str);
+        free(file_line->prev);
     }
     
     editor();
