@@ -13,7 +13,7 @@ struct line {
 };
 
 
-struct line * load_file(FILE *);
+struct line * read_lines(FILE *, size_t, struct line *);
 
 void editor();
 
@@ -35,7 +35,7 @@ int main(int argc, char ** argv){
     file_sz = ftell(file);
     rewind(file);
 
-    struct line *file_line = load_file(file);
+    struct line *file_line = read_lines(file,file_sz, NULL);
 
     initscr();
     cbreak();
@@ -92,42 +92,31 @@ void editor(){
         }
     }
 }
-struct line *read_line(FILE * file){
-    struct line *line = (struct line *) malloc(sizeof(struct line));
-    line->next = NULL;
-    line->prev = NULL;
-    line->max = LINE_LEN_MIN;
-    line->str = (char *) malloc(LINE_LEN_MIN);
 
-    while(!feof(file)){
-        ssize_t pos = 0;
-        size_t read = fread(line->str+pos, 1, LINE_LEN_MIN, file);
-        for (pos = 1;pos<read; pos++){
-            if (line->str[pos]== '\n'){
-                line->str[pos]=0;
-                fseek(file, pos-read, SEEK_CUR);
-                printf("%d, %d\n", pos, read);
+struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
+    struct line *line = malloc(sizeof(struct line));
+    line->str = malloc(50);
+    line->prev = prev;
+    line->max = 50;
+
+    fread(line->str, 1, 50, file);
+    int i =0;
+
+    while(1){
+        for (; i<line->max && line->str[i]!='\n'; i++);
+        if (i<line->max){ //nl found
+            fseek(file, i-line->max, SEEK_CUR);
+            if (ftell(file)==file_sz){
+                return NULL;
+            }else {
+                fseek(file, 1, SEEK_CUR);
+                line->next = read_lines(file, file_sz, line);
                 return line;
             }
+        }else {
+            line->max+=50;
+            realloc(line->str, line->max);
         }
-        line->max+=LINE_LEN_MIN;
-        realloc(line->str, line->max);
+
     }
-    return NULL;
-}
-struct line * load_file(FILE * file){
-    struct line * prev = NULL;
-    struct line * curr = NULL;
-    
-    prev=read_line(file);
-    while(1){
-        curr = read_line(file);
-        if (prev)
-            prev->next=curr;
-        curr->prev = prev;
-        prev = curr;
-        if(!curr) break;    
-    }
-    for (prev=curr;curr;prev=curr, curr=curr->prev);
-    return prev;
 }
