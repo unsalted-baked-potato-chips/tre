@@ -3,7 +3,7 @@
 
 #include <curses.h>
 
-#define LINE_LEN_MIN 5
+#define LINE_LEN_MIN 50
 
 struct line {
     char * str;
