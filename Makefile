@@ -1,4 +1,4 @@
-CFLAGS?=-cstd=99 -Wall -pedantic
+CFLAGS+=-std=c99 -Wall -Wpedantic
 LIBS?=-lcurses
 
 tre: main.c
