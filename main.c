@@ -95,11 +95,11 @@ void editor(){
 
 struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
     struct line *line = malloc(sizeof(struct line));
-    line->str = malloc(50);
+    line->str = malloc(LINE_LEN_MIN);
     line->prev = prev;
-    line->max = 50;
+    line->max = LINE_LEN_MIN;
 
-    fread(line->str, 1, 50, file);
+    fread(line->str, 1, LINE_LEN_MIN, file);
     int i =0;
 
     while(1){
@@ -114,7 +114,7 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
                 return line;
             }
         }else {
-            line->max+=50;
+            line->max+=LINE_LEN_MIN;
             realloc(line->str, line->max);
         }
 
