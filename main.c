@@ -68,6 +68,8 @@ ERR_main:
 void update_window_after(int y, WINDOW * win, struct line*head){
     int col;
     struct line *curr = head;
+    move(y,0);
+    clrtobot();
     wclrtobot(win);
     for(col = y; curr; curr=curr->next, col++){
         mvwaddstr(win, col, 0, curr->str);
@@ -103,7 +105,17 @@ void editor(WINDOW *win, struct line * head){
                 wmove(win, cury, curx?curx-1:curx);
                 break;
             case KEY_BACKSPACE:
-                if (!curx) break;
+                if(!line) break;
+                if (!curx) {
+                    if(!line->prev) break;
+                    struct line *prev = line->prev;
+                    del_nl(line);
+                    line = NULL;
+                    update_window_after(cury-1, win, prev);
+                    wmove(win, cury-1, 0);
+                    refresh();
+                    break;
+                }
                 del_ch(line, curx-1);
                 
                 mvwaddstr(win, line_n, 0, line->str);
@@ -112,6 +124,7 @@ void editor(WINDOW *win, struct line * head){
                 break;
             case KEY_ENTER:
             case '\n':
+                if(!line) break;
                 insert_nl(line, curx);
                 update_window_after(cury, win, line);
                 refresh();

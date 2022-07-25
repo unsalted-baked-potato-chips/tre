@@ -45,8 +45,6 @@ Cannot load non nl-terminated files
 
 Cannot exit without saving
 
-Cannot delete lines
-
 Cannot scroll
 
 ## TODO

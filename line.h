@@ -20,6 +20,7 @@ struct line * read_lines(FILE *, size_t, struct line *);
 int insert_ch(struct line*, char, size_t);
 int insert_str(struct line*, char*, size_t);
 int del_ch(struct line * , size_t );
+int del_nl(struct line *);
 int insert_nl(struct line *, int);
 int append_nl(struct line *);
 

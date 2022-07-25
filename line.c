@@ -59,6 +59,22 @@ int del_ch(struct line * line, size_t pos){
         memmove(line->str+pos,line->str+pos+1, strlen(line->str+pos+1)+1);
     return 0;
 }
+
+int del_nl(struct line *line){
+    const size_t sz =strlen(line->str)+strlen(line->prev->str)+1;
+    if (!line->prev) return 0;
+    if (line->prev->max<sz){
+        line->prev->str = realloc(line->prev->str, LINE_LEN_MIN*(sz/LINE_LEN_MIN+1));
+    }
+    strcat(line->prev->str, line->str);
+    line->prev->next =line->next;
+    if (line->next)
+        line->next->prev =line->prev;
+    free(line->str);
+    free(line);
+
+    return 0;
+}
 int insert_nl(struct line *line, int pos){
     int lstrlen, rstrlen;
 
