@@ -1,19 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include <curses.h>
 
-#define LINE_LEN_MIN 50
-
-struct line {
-    char * str;
-    size_t max;
-    struct line * next;
-    struct line * prev;
-};
-
-
-struct line * read_lines(FILE *, size_t, struct line *);
+#include "line.h"
 
 void editor();
 
@@ -42,24 +33,28 @@ int main(int argc, char ** argv){
     noecho();
     keypad(stdscr,1);
     WINDOW *editor_win = newwin(getmaxy(stdscr)-1, getmaxx(stdscr)-3, 0, 3);
+    keypad(editor_win,1);
 
     int col;
-    for(col = 0; file_line; file_line=file_line->next, col++){
-        mvwaddstr(editor_win, col, 0, file_line->str);
+    struct line *curr = file_line;
+    for(col = 0; curr; curr=curr->next, col++){
+        mvwaddstr(editor_win, col, 0, curr->str);
         mvprintw(col, 0, "%2d", col);
-        if (file_line->prev)
-            free(file_line->prev->str);
-        free(file_line->prev);
     }
     for(;col<getmaxy(editor_win);col++)
         mvaddch(col, 1, '~');
     refresh();
     wrefresh(editor_win);
-    editor(editor_win);
+    editor(editor_win, file_line);
 
     delwin(editor_win);
     endwin();
-
+    for(; curr; curr=curr->next){
+        if (curr->prev)
+            free(curr->prev->str);
+        free(curr->prev);
+    }
+ 
     fclose(file);
     free(buffer);
     return 0;
@@ -71,11 +66,13 @@ ERR_main:
 
 }
 
-void editor(WINDOW *win){
+void editor(WINDOW *win, struct line * head){
     int input;
     int cury, curx;
+    struct line * line;
+    int line_n;
     while(1) {
-        input = getch();
+        input = wgetch(win);
         cury = getcury(win);
         curx = getcurx(win);
         switch (input){
@@ -93,36 +90,18 @@ void editor(WINDOW *win){
             case KEY_LEFT:
                 wmove(win, cury, curx?curx-1:curx);
                 break;
+            default:
+                line=head;
+                for(line_n = 0;line_n<cury && line; line=line->next, line_n++);
+                if (!line) break;
+                if (isprint(input)){
+                    insert_ch(line, input, curx);
+                }
+                mvwaddstr(win, line_n, 0, line->str);
+                wclrtoeol(win);
+                wmove(win, cury, curx);
         }
         wrefresh(win);
     }
 }
-struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
-    struct line *line = malloc(sizeof(struct line));
-    line->str = malloc(LINE_LEN_MIN);
-    line->prev = prev;
-    line->max = LINE_LEN_MIN;
-    
-    long chars_read = fread(line->str, 1, LINE_LEN_MIN, file);
-    int i =0;
 
-    while(1){
-        for (; i<chars_read && line->str[i]!='\n'; i++);
-        if (i<chars_read){ //nl found
-            fseek(file, i-chars_read, SEEK_CUR);
-            line->str[i] = 0;
-            if (ftell(file)+1==file_sz){
-                line->next = NULL;
-            }else {
-                fseek(file, 1, SEEK_CUR);
-                line->next = read_lines(file, file_sz, line);
-            }
-            return line;
-        }else {
-            line->max+=LINE_LEN_MIN;
-            line->str = realloc(line->str, line->max);
-            chars_read += fread(line->str+i, 1, LINE_LEN_MIN, file);
-        }
-
-    }
-}
