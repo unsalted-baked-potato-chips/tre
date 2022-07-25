@@ -21,7 +21,7 @@ You could build out an entire IDE using TMUX with TRE, GDB, a file manager and a
 
 Or you can just edit a simple text file by just running ``tre file``
 
-Simple extensions like adding a command can be done by calling on the socket at startup
+Simple extensions like adding a command can be done by calling curl on the socket at startup
 
 ## BUGS
 
