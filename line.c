@@ -1,0 +1,100 @@
+#include <stdlib.h>
+#include <string.h>
+
+#include <curses.h>
+
+#include "line.h"
+
+struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
+    struct line *line = malloc(sizeof(struct line));
+    line->str = malloc(LINE_LEN_MIN);
+    line->prev = prev;
+    line->max = LINE_LEN_MIN;
+    
+    long chars_read = fread(line->str, 1, LINE_LEN_MIN, file);
+    int i =0;
+
+    while(1){
+        for (; i<chars_read && line->str[i]!='\n'; i++);
+        if (i<chars_read){ //nl found
+            fseek(file, i-chars_read, SEEK_CUR);
+            line->str[i] = 0;
+            if (ftell(file)+1==file_sz){
+                line->next = NULL;
+            }else {
+                fseek(file, 1, SEEK_CUR);
+                line->next = read_lines(file, file_sz, line);
+            }
+            return line;
+        }else {
+            line->max+=LINE_LEN_MIN;
+            line->str = realloc(line->str, line->max);
+            chars_read += fread(line->str+i, 1, LINE_LEN_MIN, file);
+        }
+
+    }
+}
+
+int insert_ch(struct line * line, char ch, size_t pos){
+    if(pos>strlen(line->str)) {
+        mvprintw(58,0, "%d %d", pos, strlen(line->str));
+        refresh();
+        return 1;
+    }
+    if (strlen(line->str)+2> line->max){
+        line->max += LINE_LEN_MIN;
+        line->str = realloc(line->str,line->max);
+    }
+
+    memmove(line->str+pos+1, line->str+pos, strlen(line->str+pos)+1);
+    line->str[pos]=ch;
+    return 0;
+}
+
+int insert_str(struct line * line, char *str, size_t pos){
+    return 0;
+}
+int del_ch(struct line * line, size_t pos){
+    if (pos)
+        memmove(line->str+pos,line->str+pos+1, strlen(line->str+pos+1)+1);
+    return 0;
+}
+int insert_nl(struct line *line, int pos){
+    int lstrlen, rstrlen;
+
+    rstrlen = strlen(line->str+pos);
+    lstrlen = strlen(line->str)-rstrlen;
+
+    struct line *nxt = line->next;
+    struct line *nl = malloc(sizeof(struct line));
+    nl->prev = line;
+    nl->next = nxt;
+    nl->max = LINE_LEN_MIN;
+    
+    nl->str = malloc(LINE_LEN_MIN*(rstrlen/LINE_LEN_MIN+1));
+
+    strcpy(nl->str, line->str+pos);
+    line->str[pos]=0;
+
+    line->next = nl;
+    if (nxt)
+        nxt->prev=nl;
+
+    return 0;
+}
+int append_nl(struct line *line){
+    struct line *nxt = line->next;
+    struct line *nl = malloc(sizeof(struct line));
+    nl->prev = line;
+    nl->next = nxt;
+    nl->max = LINE_LEN_MIN;
+    nl->str = malloc(LINE_LEN_MIN);
+    nl->str[0]=0;
+
+
+    line->next = nl;
+
+    if (nxt)
+        nxt->prev=nl;
+    return 0;
+}
