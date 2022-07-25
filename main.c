@@ -26,7 +26,7 @@ int main(int argc, char ** argv){
     file_sz = ftell(file);
     rewind(file);
 
-    struct line *file_line = read_lines(file,file_sz, NULL);
+    const struct line *file_line = read_lines(file,file_sz, NULL);
 
     initscr();
     cbreak();
@@ -49,8 +49,13 @@ int main(int argc, char ** argv){
 
     delwin(editor_win);
     endwin();
-    for(; curr; curr=curr->next){
-        if (curr->prev)
+
+    rewind(file);
+    for(curr = file_line; curr; curr=curr->next){
+        fputs(curr->str, file);
+        if (curr->next)
+            fputc('\n', file);
+        if (curr->prev) 
             free(curr->prev->str);
         free(curr->prev);
     }
