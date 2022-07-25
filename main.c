@@ -7,6 +7,7 @@
 #include "line.h"
 
 void editor();
+void update_window_after(int , WINDOW * , struct line*);
 
 int main(int argc, char ** argv){
     FILE * file = NULL;
@@ -35,14 +36,8 @@ int main(int argc, char ** argv){
     WINDOW *editor_win = newwin(getmaxy(stdscr)-1, getmaxx(stdscr)-3, 0, 3);
     keypad(editor_win,1);
 
-    int col;
     struct line *curr = file_line;
-    for(col = 0; curr; curr=curr->next, col++){
-        mvwaddstr(editor_win, col, 0, curr->str);
-        mvprintw(col, 0, "%2d", col);
-    }
-    for(;col<getmaxy(editor_win);col++)
-        mvaddch(col, 1, '~');
+    update_window_after(0, editor_win, file_line);
     refresh();
     wrefresh(editor_win);
     editor(editor_win, file_line);
@@ -70,7 +65,17 @@ ERR_main:
     return 1;
 
 }
-
+void update_window_after(int y, WINDOW * win, struct line*head){
+    int col;
+    struct line *curr = head;
+    wclrtobot(win);
+    for(col = y; curr; curr=curr->next, col++){
+        mvwaddstr(win, col, 0, curr->str);
+        mvprintw(col, 0, "%2d", col);
+    }
+    for(;col<getmaxy(win);col++)
+        mvaddch(col, 1, '~');
+}
 void editor(WINDOW *win, struct line * head){
     int input;
     int cury, curx;
@@ -80,6 +85,8 @@ void editor(WINDOW *win, struct line * head){
         input = wgetch(win);
         cury = getcury(win);
         curx = getcurx(win);
+        line=head;
+        for(line_n = 0;line_n<cury && line; line=line->next, line_n++);
         switch (input){
             case KEY_END:
                 return;
@@ -95,9 +102,18 @@ void editor(WINDOW *win, struct line * head){
             case KEY_LEFT:
                 wmove(win, cury, curx?curx-1:curx);
                 break;
+            case KEY_BACKSPACE:
+                if (curx)
+                    del_ch(line, curx-1);
+                break;
+            case KEY_ENTER:
+            case '\n':
+                insert_nl(line, curx);
+                update_window_after(cury, win, line);
+                refresh();
+                wmove(win, cury+1, 0);
+                break;
             default:
-                line=head;
-                for(line_n = 0;line_n<cury && line; line=line->next, line_n++);
                 if (!line) break;
                 if (isprint(input)){
                     insert_ch(line, input, curx);
