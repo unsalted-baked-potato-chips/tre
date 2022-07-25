@@ -53,7 +53,7 @@ int main(int argc, char ** argv){
     rewind(file);
     for(curr = file_line; curr; curr=curr->next){
         fputs(curr->str, file);
-        if (curr->next)
+        //if (curr->next)
             fputc('\n', file);
         if (curr->prev) 
             free(curr->prev->str);
@@ -104,7 +104,7 @@ void editor(WINDOW *win, struct line * head){
                 }
                 mvwaddstr(win, line_n, 0, line->str);
                 wclrtoeol(win);
-                wmove(win, cury, curx);
+                wmove(win, cury, curx+1);
         }
         wrefresh(win);
     }
