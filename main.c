@@ -103,8 +103,12 @@ void editor(WINDOW *win, struct line * head){
                 wmove(win, cury, curx?curx-1:curx);
                 break;
             case KEY_BACKSPACE:
-                if (curx)
-                    del_ch(line, curx-1);
+                if (!curx) break;
+                del_ch(line, curx-1);
+                
+                mvwaddstr(win, line_n, 0, line->str);
+                wclrtoeol(win);
+                wmove(win, cury, curx-1);
                 break;
             case KEY_ENTER:
             case '\n':
