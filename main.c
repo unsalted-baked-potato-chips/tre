@@ -41,18 +41,23 @@ int main(int argc, char ** argv){
     cbreak();
     noecho();
     keypad(stdscr,1);
-    for(int col = 0; file_line; file_line=file_line->next, col++){
-        move(col, 0);
-        addstr(file_line->str);
-        refresh();
+    WINDOW *editor_win = newwin(getmaxy(stdscr)-1, getmaxx(stdscr)-3, 0, 3);
+
+    int col;
+    for(col = 0; file_line; file_line=file_line->next, col++){
+        mvwaddstr(editor_win, col, 0, file_line->str);
+        mvprintw(col, 0, "%2d", col);
         if (file_line->prev)
             free(file_line->prev->str);
         free(file_line->prev);
     }
-    
-    editor();
-
+    for(;col<getmaxy(editor_win);col++)
+        mvaddch(col, 1, '~');
     refresh();
+    wrefresh(editor_win);
+    editor(editor_win);
+
+    delwin(editor_win);
     endwin();
 
     fclose(file);
@@ -66,33 +71,30 @@ ERR_main:
 
 }
 
-void editor(){
+void editor(WINDOW *win){
     int input;
     int cury, curx;
     while(1) {
         input = getch();
-        cury = getcury(stdscr);
-        curx = getcurx(stdscr);
+        cury = getcury(win);
+        curx = getcurx(win);
         switch (input){
             case KEY_END:
                 return;
             case KEY_UP:
-                move(cury?cury-1:cury, curx);
-                refresh();
+                wmove(win, cury?cury-1:cury, curx);
                 break;
             case KEY_DOWN:
-                move(cury<getmaxy(stdscr)?cury+1:cury, curx);
-                refresh();
+                wmove(win, cury<getmaxy(stdscr)?cury+1:cury, curx);
                 break;
             case KEY_RIGHT:
-                move(cury, curx<getmaxx(stdscr)?curx+1:curx);
-                refresh();
+                wmove(win, cury, curx<getmaxx(stdscr)?curx+1:curx);
                 break;
             case KEY_LEFT:
-                move(cury, curx?curx-1:curx);
-                refresh();
+                wmove(win, cury, curx?curx-1:curx);
                 break;
         }
+        wrefresh(win);
     }
 }
 struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
