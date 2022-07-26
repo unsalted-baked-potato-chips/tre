@@ -19,7 +19,7 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
         if (i<chars_read){ //nl found
             fseek(file, i-chars_read, SEEK_CUR);
             line->str[i] = 0;
-            if (ftell(file)+1==file_sz){
+            if (ftell(file)+1>=file_sz){
                 line->next = NULL;
             }else {
                 fseek(file, 1, SEEK_CUR);

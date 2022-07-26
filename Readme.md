@@ -40,9 +40,6 @@ I mean yeah.
 I hope this isn't true. But we'll see.
 
 ## BUGS
-
-Cannot load non nl-terminated files
-
 Cannot exit without saving
 
 Cannot scroll
