@@ -55,8 +55,7 @@ int insert_str(struct line * line, char *str, size_t pos){
     return 0;
 }
 int del_ch(struct line * line, size_t pos){
-    if (pos)
-        memmove(line->str+pos,line->str+pos+1, strlen(line->str+pos+1)+1);
+    memmove(line->str+pos,line->str+pos+1, strlen(line->str+pos+1)+1);
     return 0;
 }
 
