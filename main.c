@@ -17,17 +17,20 @@ int main(int argc, char ** argv){
     if (argc == 1){
         return 1;
     }
-    
-    file = fopen(argv[1], "r+");
+    file = fopen(argv[1], "r");
     if (!file){
         return 1;
     }
-
+    
+    flockfile(file);
     fseek(file, 0, SEEK_END);
     file_sz = ftell(file);
     rewind(file);
 
     const struct line *file_line = read_lines(file,file_sz, NULL);
+    
+    fclose(file);
+    file = NULL;
 
     initscr();
     cbreak();
@@ -45,7 +48,10 @@ int main(int argc, char ** argv){
     delwin(editor_win);
     endwin();
 
-    rewind(file);
+    file = fopen(argv[1], "w");
+    if (!file){
+        goto ERR_main;
+    }
     for(curr = file_line; curr; curr=curr->next){
         fputs(curr->str, file);
         //if (curr->next)
@@ -53,13 +59,14 @@ int main(int argc, char ** argv){
         if (curr->prev) 
             free(curr->prev->str);
         free(curr->prev);
-    }
- 
+    } 
+    funlockfile(file);
     fclose(file);
     free(buffer);
     return 0;
 
 ERR_main:
+    funlockfile(file);
     fclose(file);
     free(buffer);
     return 1;
