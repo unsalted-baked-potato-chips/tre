@@ -7,7 +7,7 @@
 
 struct editor_state * init_editor(struct line * head){
     struct editor_state *state = malloc(sizeof(struct editor_state));
-    state->current_line = 0;
+    state->current_line = head;
     state->head = head;
     state->view =0;
     state->win = newwin(getmaxy(stdscr)-1, getmaxx(stdscr)-3, 0, 3);
@@ -16,14 +16,21 @@ struct editor_state * init_editor(struct line * head){
     state->line_count =0;
     for (struct line *line = head; line; line=line->next)
         state->line_count++;
+    update_window_after(state);
+    wmove(state->win, 0,0);
+    refresh();
+    wrefresh(state->win);
     return state;
 }
 
 void update_window_after(struct editor_state*state){
-    int col;
+    int startx, starty;
+    startx=getcurx(state->win);
+    starty=getcury(state->win);
+    int col =0 ;
     int y = state->current_line_n - state->view;
     
-    struct line *curr = state->head;
+    struct line *curr = state->current_line;
     move(y,0);
     clrtobot();
     wclrtobot(state->win);
@@ -33,70 +40,73 @@ void update_window_after(struct editor_state*state){
     }
     for(;col<getmaxy(state->win);col++)
         mvaddch(col, 1, '~');
+    wmove(state->win, starty, startx);
+}
+int goto_line(struct editor_state * state, int line, int col){
+    if (line <0 || line>=state->line_count) return 1;
+    wmove(state->win, line, col);
+    state->current_line_n = line;
+    
+    int i =0;
+    for (state->current_line = state->head; i<line; i++, state->current_line=state->current_line->next);
+    return 0;
 }
 void editor(struct editor_state * state){
     int input;
     int cury, curx;
-    struct line * line;
-    int line_n;
     while(1) {
         input = wgetch(state->win);
         cury = getcury(state->win);
         curx = getcurx(state->win);
-        line=state->head;
-        for(line_n = 0;line_n<cury && line; line=line->next, line_n++);
         switch (input){
             case KEY_END:
                 return;
             case KEY_UP:
-                wmove(state->win, cury?cury-1:cury, curx);
-                state->current_line_n = state->current_line_n?state->current_line_n-1: state->current_line_n;
+                goto_line(state, state->current_line_n-1, curx);
                 break;
             case KEY_DOWN:
-                wmove(state->win, cury<getmaxy(stdscr)?cury+1:cury, curx);
-                state->current_line_n = state->current_line_n<getmaxy(stdscr)?state->current_line_n-1: state->current_line_n;
+                goto_line(state, state->current_line_n+1, curx);
                 break;
             case KEY_RIGHT:
                 wmove(state->win, cury, curx<getmaxx(stdscr)?curx+1:curx);
                 break;
             case KEY_LEFT:
                 wmove(state->win, cury, curx?curx-1:curx);
-                state->current_line = state->current_line?state->current_line-1: state->current_line;
                 break;
             case KEY_BACKSPACE:
-                if(!line) break;
+                if(cury>=state->line_count) break;
                 if (!curx) {
-                    if(!line->prev) break;
-                    struct line *prev = line->prev;
-                    del_nl(line);
-                    line = NULL;
+                    if(!state->current_line->prev) break;
+                    del_nl(state->current_line);
+                    state->current_line = NULL;
+                    
+                    state->line_count--;
+                    goto_line(state, state->current_line_n-1, 0);
                     update_window_after(state);
-                    wmove(state->win, cury-1, 0);
-                    state->current_line_n = state->current_line_n?state->current_line_n-1: state->current_line_n;
                     refresh();
                     break;
                 }
-                del_ch(line, curx-1);
+                del_ch(state->current_line, curx-1);
                 
-                mvwaddstr(state->win, line_n, 0, line->str);
+                mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
                 wclrtoeol(state->win);
                 wmove(state->win, cury, curx-1);
                 break;
             case KEY_ENTER:
             case '\n':
-                if(!line) break;
-                insert_nl(line, curx);
+                if(cury>=state->line_count) break;
+                insert_nl(state->current_line, curx);
+                state->line_count++;
                 update_window_after(state);
-                state->current_line_n = state->current_line_n<getmaxy(stdscr)?state->current_line_n-1: state->current_line_n;
+                goto_line(state, state->current_line_n+1, 0);
                 refresh();
-                wmove(state->win, cury+1, 0);
                 break;
             default:
-                if (!line) break;
+                if (cury>=state->line_count) break;
                 if (isprint(input)){
-                    insert_ch(line, input, curx);
+                    insert_ch(state->current_line, input, curx);
                 }
-                mvwaddstr(state->win, line_n, 0, line->str);
+                mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
                 wclrtoeol(state->win);
                 wmove(state->win, cury, curx+1);
         }

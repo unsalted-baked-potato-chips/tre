@@ -36,12 +36,7 @@ int main(int argc, char ** argv){
     keypad(stdscr,1);
 
     struct editor_state * editor_state = init_editor(file_line);
-    struct line *curr = file_line;
 
-    update_window_after(editor_state);
-
-    refresh();
-    wrefresh(editor_state->win);
 
     editor(editor_state);
     
@@ -52,7 +47,8 @@ int main(int argc, char ** argv){
     if (!file){
         goto ERR_main;
     }
-    for(curr = file_line; curr; curr=curr->next){
+
+    for(struct line *curr = file_line; curr; curr=curr->next){
         fputs(curr->str, file);
         //if (curr->next)
             fputc('\n', file);
