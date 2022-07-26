@@ -76,41 +76,35 @@ int del_nl(struct line *line){
     return 0;
 }
 int insert_nl(struct line *line, int pos){
-    int lstrlen, rstrlen;
-
-    rstrlen = strlen(line->str+pos);
-    lstrlen = strlen(line->str)-rstrlen;
-
-    struct line *nxt = line->next;
+    int rstrlen = strlen(line->str+pos);
     struct line *nl = malloc(sizeof(struct line));
     nl->prev = line;
-    nl->next = nxt;
-    nl->max = LINE_LEN_MIN;
+    nl->next = line->next;
+    nl->max = LINE_LEN_MIN*(rstrlen/LINE_LEN_MIN+1);
     
     nl->str = malloc(LINE_LEN_MIN*(rstrlen/LINE_LEN_MIN+1));
 
     strcpy(nl->str, line->str+pos);
     line->str[pos]=0;
 
+
+    if (line->next)
+        line->next->prev=nl;
     line->next = nl;
-    if (nxt)
-        nxt->prev=nl;
 
     return 0;
 }
 int append_nl(struct line *line){
-    struct line *nxt = line->next;
     struct line *nl = malloc(sizeof(struct line));
     nl->prev = line;
-    nl->next = nxt;
+    nl->next = line->next;
     nl->max = LINE_LEN_MIN;
     nl->str = malloc(LINE_LEN_MIN);
     nl->str[0]=0;
 
-
+    if (line->next)
+        line->next->prev=nl;
     line->next = nl;
 
-    if (nxt)
-        nxt->prev=nl;
     return 0;
 }
