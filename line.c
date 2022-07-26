@@ -64,6 +64,7 @@ int del_nl(struct line *line){
     const size_t sz =strlen(line->str)+strlen(line->prev->str)+1;
     if (line->prev->max<sz){
         line->prev->str = realloc(line->prev->str, LINE_LEN_MIN*(sz/LINE_LEN_MIN+1));
+        line->prev->max = LINE_LEN_MIN*(sz/LINE_LEN_MIN+1);
     }
     strcat(line->prev->str, line->str);
     line->prev->next =line->next;
