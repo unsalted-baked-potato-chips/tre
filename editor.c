@@ -11,9 +11,11 @@ struct editor_state * init_editor(struct line * head){
     state->head = head;
     state->view =0;
     state->win = newwin(getmaxy(stdscr)-1, getmaxx(stdscr)-3, 0, 3);
+    keypad(state->win,1);
     state->current_line_n =0;
+    state->line_count =0;
     for (struct line *line = head; line; line=line->next)
-        state->current_line_n++;
+        state->line_count++;
     return state;
 }
 

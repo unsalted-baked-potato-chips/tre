@@ -10,6 +10,7 @@ struct editor_state{
     struct line *head;
     struct line *current_line; 
     size_t current_line_n;
+    size_t line_count;
     size_t view;
     WINDOW * win;
 };

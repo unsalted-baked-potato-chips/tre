@@ -25,7 +25,7 @@ int main(int argc, char ** argv){
     file_sz = ftell(file);
     rewind(file);
 
-    const struct line *file_line = read_lines(file,file_sz, NULL);
+    struct line *file_line = read_lines(file,file_sz, NULL);
     
     fclose(file);
     file = NULL;
@@ -34,16 +34,18 @@ int main(int argc, char ** argv){
     cbreak();
     noecho();
     keypad(stdscr,1);
-    WINDOW *editor_win = newwin(getmaxy(stdscr)-1, getmaxx(stdscr)-3, 0, 3);
-    keypad(editor_win,1);
 
+    struct editor_state * editor_state = init_editor(file_line);
     struct line *curr = file_line;
-    update_window_after(0, editor_win, file_line);
-    refresh();
-    wrefresh(editor_win);
-    editor(editor_win, file_line);
 
-    delwin(editor_win);
+    update_window_after(editor_state);
+
+    refresh();
+    wrefresh(editor_state->win);
+
+    editor(editor_state);
+    
+    delwin(editor_state->win);
     endwin();
 
     file = fopen(argv[1], "w");
