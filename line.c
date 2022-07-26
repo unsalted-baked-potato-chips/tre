@@ -60,8 +60,8 @@ int del_ch(struct line * line, size_t pos){
 }
 
 int del_nl(struct line *line){
-    const size_t sz =strlen(line->str)+strlen(line->prev->str)+1;
     if (!line->prev) return 0;
+    const size_t sz =strlen(line->str)+strlen(line->prev->str)+1;
     if (line->prev->max<sz){
         line->prev->str = realloc(line->prev->str, LINE_LEN_MIN*(sz/LINE_LEN_MIN+1));
     }
