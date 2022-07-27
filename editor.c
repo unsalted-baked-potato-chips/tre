@@ -43,6 +43,23 @@ void update_window_after(struct editor_state*state){
         mvaddch(col, 1, '~');
     wmove(state->win, starty, startx);
 }
+
+int goto_prev(struct editor_state *state, int col){
+    if (!state->current_line->prev) return 1;
+    state->current_line_n--;
+    state->current_line = state->current_line->prev;
+    move_curs(state, col);
+    return 0;
+}
+
+int goto_next(struct editor_state *state, int col){
+    if (!state->current_line->next) return 1;
+    state->current_line_n++;
+    state->current_line = state->current_line->next;
+    move_curs(state, col);
+    return 0;
+}
+
 int goto_line(struct editor_state * state, int line, int col){
     if (line <0 || line>=state->line_count) return 1;
     state->current_line_n = line;
@@ -55,7 +72,6 @@ int goto_line(struct editor_state * state, int line, int col){
 
 int move_curs(struct editor_state *state, int x){
     if(x<0){
-
         wmove(state->win, state->current_line_n, 0); 
     }else if( x>=strlen(state->current_line->str)){
 
@@ -76,10 +92,10 @@ void editor(struct editor_state * state){
             case KEY_END:
                 return;
             case KEY_UP:
-                goto_line(state, state->current_line_n-1, curx);
+                goto_prev(state, curx);
                 break;
             case KEY_DOWN:
-                goto_line(state, state->current_line_n+1, curx);
+                goto_next(state, curx);
                 break;
             case KEY_RIGHT:
                 move_curs(state, curx+1);

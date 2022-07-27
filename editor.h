@@ -20,6 +20,8 @@ void editor(struct editor_state *);
 void update_window_after(struct editor_state*state);
 int move_curs(struct editor_state *, int );
 int goto_line(struct editor_state * , int , int );
+int goto_next(struct editor_state *state, int col);
+int goto_prev(struct editor_state *state, int col);
 
 
 #endif /* EDITOR_H */
