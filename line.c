@@ -36,11 +36,6 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
 }
 
 int insert_ch(struct line * line, char ch, size_t pos){
-    if(pos>strlen(line->str)) {
-        mvprintw(58,0, "%d %d", pos, strlen(line->str));
-        refresh();
-        return 1;
-    }
     if (strlen(line->str)+2> line->max){
         line->max += LINE_LEN_MIN;
         line->str = realloc(line->str,line->max);
