@@ -73,9 +73,9 @@ int goto_line(struct editor_state * state, int line, int col){
 int move_curs(struct editor_state *state, int x){
     if(x<0){
         wmove(state->win, state->current_line_n, 0); 
-    }else if( x>=strlen(state->current_line->str)){
+    }else if( x>strlen(state->current_line->str)){
 
-        wmove(state->win, state->current_line_n, strlen(state->current_line->str)-1); 
+        wmove(state->win, state->current_line_n, strlen(state->current_line->str)); 
     }else {
         wmove(state->win, state->current_line_n, x); 
     }
