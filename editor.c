@@ -105,7 +105,7 @@ void editor(struct editor_state * state){
                 break;
             case KEY_BACKSPACE:
                 if(cury>=state->line_count) break;
-                if (!curx) {
+                if (curx!=0) {
                     if(!state->current_line->prev) break;
                     del_nl(state->current_line);
                     state->current_line = NULL;
