@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <curses.h>
+#include <string.h>
 
 #include "line.h"
 #include "editor.h"
@@ -44,11 +45,24 @@ void update_window_after(struct editor_state*state){
 }
 int goto_line(struct editor_state * state, int line, int col){
     if (line <0 || line>=state->line_count) return 1;
-    wmove(state->win, line, col);
     state->current_line_n = line;
     
     int i =0;
     for (state->current_line = state->head; i<line; i++, state->current_line=state->current_line->next);
+    move_curs(state, col);
+    return 0;
+}
+
+int move_curs(struct editor_state *state, int x){
+    if(x<0){
+
+        wmove(state->win, state->current_line_n, 0); 
+    }else if( x>=strlen(state->current_line->str)){
+
+        wmove(state->win, state->current_line_n, strlen(state->current_line->str)-1); 
+    }else {
+        wmove(state->win, state->current_line_n, x); 
+    }
     return 0;
 }
 void editor(struct editor_state * state){
@@ -68,10 +82,10 @@ void editor(struct editor_state * state){
                 goto_line(state, state->current_line_n+1, curx);
                 break;
             case KEY_RIGHT:
-                wmove(state->win, cury, curx<getmaxx(stdscr)?curx+1:curx);
+                move_curs(state, curx+1);
                 break;
             case KEY_LEFT:
-                wmove(state->win, cury, curx?curx-1:curx);
+                move_curs(state, curx-1);
                 break;
             case KEY_BACKSPACE:
                 if(cury>=state->line_count) break;
@@ -90,7 +104,7 @@ void editor(struct editor_state * state){
                 
                 mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
                 wclrtoeol(state->win);
-                wmove(state->win, cury, curx-1);
+                move_curs(state, curx-1);
                 break;
             case KEY_ENTER:
             case '\n':
@@ -108,7 +122,7 @@ void editor(struct editor_state * state){
                 }
                 mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
                 wclrtoeol(state->win);
-                wmove(state->win, cury, curx+1);
+                move_curs(state, curx+1);
         }
         wrefresh(state->win);
     }
