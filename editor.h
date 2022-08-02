@@ -31,4 +31,9 @@ int goto_next(struct editor_state *state, int col);
 int goto_prev(struct editor_state *state, int col);
 
 
+void edit_insert_char(struct editor_state * state, int ch, int curx);
+void edit_insert_nl(struct editor_state * stae);
+void edit_delete_prev_line(struct editor_state * state);
+void edit_delete_char(struct editor_state * state, int col);
+
 #endif /* EDITOR_H */

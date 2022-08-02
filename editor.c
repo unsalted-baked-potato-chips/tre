@@ -143,12 +143,47 @@ int move_curs(struct editor_state *state, int x){
     }
     return 0;
 }
+
+void edit_delete_char(struct editor_state * state, int col){
+    del_ch(state->current_line, col);
+
+    mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
+    wclrtoeol(state->win);
+    move_curs(state, col);
+
+}
+void edit_delete_prev_line(struct editor_state * state){
+    if(!state->current_line->prev) return;
+    del_nl(state->current_line);
+    state->current_line = NULL;
+
+    state->line_count--;
+    goto_line(state, state->current_line_n-1, 0);
+    update_window_after(state);
+    refresh();
+}
+void edit_insert_nl(struct editor_state * state){
+    insert_nl(state->current_line, getcurx(state->win));
+    state->line_count++;
+    update_window_after(state);
+    goto_next(state, 0); 
+    refresh();
+}
+void edit_insert_char(struct editor_state * state, int ch, int curx){
+    if (isprint(ch)){
+        insert_ch(state->current_line, ch, curx);
+    }
+    mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
+    wclrtoeol(state->win);
+    move_curs(state, curx+1);
+
+}
+
 void editor(struct editor_state * state){
     int input;
-    int cury, curx;
+    int curx;
     while(1) {
         input = wgetch(state->win);
-        cury = getcury(state->win);
         curx = getcurx(state->win);
         switch (input){
             case KEY_END:
@@ -166,42 +201,20 @@ void editor(struct editor_state * state){
                 move_curs(state, curx-1);
                 break;
             case KEY_BACKSPACE:
-                if(cury>=state->line_count) break;
                 if (curx==0) {
-                    if(!state->current_line->prev) break;
-                    del_nl(state->current_line);
-                    state->current_line = NULL;
-                    
-                    state->line_count--;
-                    goto_line(state, state->current_line_n-1, 0);
-                    update_window_after(state);
-                    refresh();
+                    edit_delete_prev_line(state);
                     break;
                 }
-                del_ch(state->current_line, curx-1);
-                
-                mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
-                wclrtoeol(state->win);
-                move_curs(state, curx-1);
+                edit_delete_char(state, curx-1);
                 break;
             case KEY_ENTER:
             case '\n':
-                if(cury>=state->line_count) break;
-                insert_nl(state->current_line, curx);
-                state->line_count++;
-                update_window_after(state);
-                goto_next(state, 0); 
-                refresh();
-                break;
+                edit_insert_nl(state);
+               break;
             default:
-                if (cury>=state->line_count) break;
-                if (isprint(input)){
-                    insert_ch(state->current_line, input, curx);
-                }
-                mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
-                wclrtoeol(state->win);
-                move_curs(state, curx+1);
-        }
+               edit_insert_char(state, input, curx);
+               break;
+       }
         wrefresh(state->win);
     }
 }
