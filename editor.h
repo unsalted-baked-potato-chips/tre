@@ -18,6 +18,7 @@ struct editor_state{
 struct editor_state *init_editor(struct line *head); 
 void editor(struct editor_state *);
 void update_window_after(struct editor_state*state);
+void update_window(struct editor_state * state);
 void paint(struct editor_state * state);
 int move_curs(struct editor_state *, int );
 int goto_line(struct editor_state * , int , int );

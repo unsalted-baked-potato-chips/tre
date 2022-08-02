@@ -21,7 +21,12 @@ struct editor_state * init_editor(struct line * head){
     paint(state);
     return state;
 }
-void paint(struct editor_state * state){ 
+void paint(struct editor_state * state){
+    update_window(state); 
+    refresh();
+    wrefresh(state->win);
+}
+void update_window(struct editor_state * state){ 
     int row;
     struct line * draw_line;
 
@@ -37,8 +42,6 @@ void paint(struct editor_state * state){
     for(;row<getmaxy(state->win);row++)
         mvaddch(row, 1, '~');
     wmove(state->win, state->current_line_n -state->view, 0);
-    refresh();
-    wrefresh(state->win);
 }
 
 void update_window_after(struct editor_state*state){
@@ -72,7 +75,8 @@ void update_view(struct editor_state *state){
     }else {
         return;
     }
-    paint(state);
+    update_window(state);
+    refresh();
 }
 int goto_prev(struct editor_state *state, int col){
     if (!state->current_line->prev) return 1;
@@ -145,7 +149,8 @@ void editor(struct editor_state * state){
                     
                     state->line_count--;
                     goto_line(state, state->current_line_n-1, 0);
-                    paint(state);
+                    update_window_after(state);
+                    refresh();
                     break;
                 }
                 del_ch(state->current_line, curx-1);
