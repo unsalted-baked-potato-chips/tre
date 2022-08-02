@@ -17,38 +17,69 @@ struct editor_state * init_editor(struct line * head){
     state->line_count =0;
     for (struct line *line = head; line; line=line->next)
         state->line_count++;
-    update_window_after(state);
     wmove(state->win, 0,0);
+    paint(state);
+    return state;
+}
+void paint(struct editor_state * state){ 
+    int row;
+    struct line * draw_line;
+
+    move(0,0);
+    clrtobot();
+    wclrtobot(state->win);
+    
+    for(row = state->current_line_n, draw_line = state->current_line; row != state->view; row--, draw_line=draw_line->prev);
+    for(row = 0; row < getmaxy(state->win) && draw_line; draw_line=draw_line->next, row++){
+        mvwaddstr(state->win, row, 0, draw_line->str);
+        mvprintw(row, 0, "%2d", row+state->view);
+    }
+    for(;row<getmaxy(state->win);row++)
+        mvaddch(row, 1, '~');
+    wmove(state->win, state->current_line_n -state->view, 0);
     refresh();
     wrefresh(state->win);
-    return state;
 }
 
 void update_window_after(struct editor_state*state){
     int startx, starty;
     startx=getcurx(state->win);
     starty=getcury(state->win);
-    int col =0 ;
+    int row =0 ;
     int y = state->current_line_n - state->view;
     
-    struct line *curr = state->current_line;
+    struct line *draw_line = state->current_line;
     move(y,0);
     clrtobot();
     wclrtobot(state->win);
-    for(col = y; curr; curr=curr->next, col++){
-        mvwaddstr(state->win, col, 0, curr->str);
-        mvprintw(col, 0, "%2d", col);
+    for(row = y; row < getmaxy(state->win) && draw_line; draw_line=draw_line->next, row++){
+        mvwaddstr(state->win, row, 0, draw_line->str);
+        mvprintw(row, 0, "%2d", row+state->view);
     }
-    for(;col<getmaxy(state->win);col++)
-        mvaddch(col, 1, '~');
+    for(;row<getmaxy(state->win);row++)
+        mvaddch(row, 1, '~');
+ 
     wmove(state->win, starty, startx);
 }
-
+void update_view(struct editor_state *state){
+    if (state->current_line_n-state->view >= getmaxy(state->win)){
+        state->view+= getmaxy(state->win);
+    } else if(state->current_line_n < state->view){ 
+        state->view-= getmaxy(state->win);
+        if (state->view <0){
+            state->view = 0;
+        }
+    }else {
+        return;
+    }
+    paint(state);
+}
 int goto_prev(struct editor_state *state, int col){
     if (!state->current_line->prev) return 1;
     state->current_line_n--;
     state->current_line = state->current_line->prev;
     move_curs(state, col);
+    update_view(state);
     return 0;
 }
 
@@ -57,6 +88,7 @@ int goto_next(struct editor_state *state, int col){
     state->current_line_n++;
     state->current_line = state->current_line->next;
     move_curs(state, col);
+    update_view(state);
     return 0;
 }
 
@@ -67,17 +99,18 @@ int goto_line(struct editor_state * state, int line, int col){
     int i =0;
     for (state->current_line = state->head; i<line; i++, state->current_line=state->current_line->next);
     move_curs(state, col);
+    update_view(state);
     return 0;
 }
 
 int move_curs(struct editor_state *state, int x){
     if(x<0){
-        wmove(state->win, state->current_line_n, 0); 
+        wmove(state->win, state->current_line_n-state->view, 0); 
     }else if( x>strlen(state->current_line->str)){
 
-        wmove(state->win, state->current_line_n, strlen(state->current_line->str)); 
+        wmove(state->win, state->current_line_n-state->view, strlen(state->current_line->str)); 
     }else {
-        wmove(state->win, state->current_line_n, x); 
+        wmove(state->win, state->current_line_n-state->view, x); 
     }
     return 0;
 }
@@ -112,8 +145,7 @@ void editor(struct editor_state * state){
                     
                     state->line_count--;
                     goto_line(state, state->current_line_n-1, 0);
-                    update_window_after(state);
-                    refresh();
+                    paint(state);
                     break;
                 }
                 del_ch(state->current_line, curx-1);
@@ -128,7 +160,7 @@ void editor(struct editor_state * state){
                 insert_nl(state->current_line, curx);
                 state->line_count++;
                 update_window_after(state);
-                goto_line(state, state->current_line_n+1, 0);
+                goto_next(state, 0); 
                 refresh();
                 break;
             default:
