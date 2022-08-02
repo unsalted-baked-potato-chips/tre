@@ -16,6 +16,7 @@ struct line {
 
 
 struct line * read_lines(FILE *, size_t, struct line *);
+void destroy_line_buffer(struct line *head);
 
 int insert_ch(struct line*, char, size_t);
 int insert_str(struct line*, char*, size_t);

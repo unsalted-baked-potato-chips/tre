@@ -35,6 +35,13 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
     }
 }
 
+void destroy_line_buffer(struct line *head){
+    for (; head->next; head=head->next){
+        free(head->prev);
+        head->prev = NULL;
+    }
+    free(head);
+}
 int insert_ch(struct line * line, char ch, size_t pos){
     if (strlen(line->str)+2> line->max){
         line->max += LINE_LEN_MIN;

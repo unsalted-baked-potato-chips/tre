@@ -15,7 +15,12 @@ struct editor_state{
     WINDOW * win;
 };
 
-struct editor_state *init_editor(struct line *head); 
+struct editor_state *init_editor(FILE *); 
+void destroy_editor(struct editor_state * state);
+
+
+void write_buffer(struct editor_state * state, FILE *file);
+
 void editor(struct editor_state *);
 void update_window_after(struct editor_state*state);
 void update_window(struct editor_state * state);

@@ -2,11 +2,24 @@
 #include <stdlib.h>
 #include <curses.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "line.h"
 #include "editor.h"
 
-struct editor_state * init_editor(struct line * head){
+struct editor_state * init_editor(FILE *file){
+
+    fseek(file, 0, SEEK_END);
+    long file_sz = ftell(file);
+    rewind(file);
+
+    struct line *head = read_lines(file,file_sz, NULL);
+
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr,1);
+
     struct editor_state *state = malloc(sizeof(struct editor_state));
     state->current_line = head;
     state->head = head;
@@ -20,6 +33,18 @@ struct editor_state * init_editor(struct line * head){
     wmove(state->win, 0,0);
     paint(state);
     return state;
+}
+void write_buffer(struct editor_state * state, FILE *file){
+    for(struct line *curr = state->head; curr; curr=curr->next){
+        fputs(curr->str, file);
+        fputc('\n', file);
+    } 
+}
+void destroy_editor(struct editor_state * state){
+    destroy_line_buffer(state->head);
+    delwin(state->win);
+    endwin();
+    free(state);
 }
 void paint(struct editor_state * state){
     update_window(state); 

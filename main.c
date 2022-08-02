@@ -4,13 +4,10 @@
 
 #include <curses.h>
 
-#include "line.h"
 #include "editor.h"
 
 int main(int argc, char ** argv){
     FILE * file = NULL;
-    char * buffer = NULL;
-    long file_sz  = 0;
 
     if (argc == 1){
         return 1;
@@ -21,50 +18,34 @@ int main(int argc, char ** argv){
     }
     
     flockfile(file);
-    fseek(file, 0, SEEK_END);
-    file_sz = ftell(file);
-    rewind(file);
 
-    struct line *file_line = read_lines(file,file_sz, NULL);
-    
+    struct editor_state * editor_state = init_editor(file);
+    funlockfile(file);
     fclose(file);
     file = NULL;
 
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr,1);
-
-    struct editor_state * editor_state = init_editor(file_line);
-
-
     editor(editor_state);
-    
-    delwin(editor_state->win);
-    endwin();
 
     file = fopen(argv[1], "w");
     if (!file){
         goto ERR_main;
     }
 
-    for(struct line *curr = file_line; curr; curr=curr->next){
-        fputs(curr->str, file);
-        //if (curr->next)
-            fputc('\n', file);
-        if (curr->prev) 
-            free(curr->prev->str);
-        free(curr->prev);
-    } 
+    flockfile(file);
+    
+    write_buffer(editor_state, file);
+
     funlockfile(file);
     fclose(file);
-    free(buffer);
+
+    destroy_editor(editor_state);
     return 0;
 
 ERR_main:
     funlockfile(file);
     fclose(file);
-    free(buffer);
+    destroy_editor(editor_state);
     return 1;
 
 }
+
