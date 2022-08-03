@@ -14,10 +14,11 @@ struct editor_state{
     ssize_t current_line_n;
     ssize_t line_count;
     ssize_t view;
+    char filename[256];
     WINDOW * win;
 };
 
-struct editor_state * init_editor(FILE *file){
+struct editor_state * init_editor(FILE *file, char filename[256]){
     ESCDELAY=0;
     fseek(file, 0, SEEK_END);
     long file_sz = ftell(file);
@@ -39,6 +40,8 @@ struct editor_state * init_editor(FILE *file){
     keypad(state->win,1);
     state->current_line_n =0;
     state->line_count =0;
+    strncpy(state->filename, filename, 255);
+    state->filename[255]=0;
     for (struct line *line = head; line; line=line->next)
         state->line_count++;
     wmove(state->win, 0,0);
@@ -205,6 +208,20 @@ void editor(struct editor_state * state){
                 refresh();
                 if (!strcmp("q", buff)){
                     return;
+                }else if (!strcmp("w", buff)){
+                    FILE * file;                
+                    file = fopen(state->filename, "w");
+                    if (!file){
+                        break;
+                    }
+
+                    flockfile(file);
+
+                    write_buffer(state, file);
+
+                    funlockfile(file);
+                    fclose(file);
+
                 }
                 wmove(state->win, curx, cury);
                 break;

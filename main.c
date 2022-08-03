@@ -19,24 +19,12 @@ int main(int argc, char ** argv){
     
     flockfile(file);
 
-    struct editor_state * editor_state = init_editor(file);
+    struct editor_state * editor_state = init_editor(file, argv[1]);
     funlockfile(file);
     fclose(file);
     file = NULL;
 
     editor(editor_state);
-
-    file = fopen(argv[1], "w");
-    if (!file){
-        goto ERR_main;
-    }
-
-    flockfile(file);
-    
-    write_buffer(editor_state, file);
-
-    funlockfile(file);
-    fclose(file);
 
     destroy_editor(editor_state);
     return 0;

@@ -6,7 +6,7 @@
 
 struct editor_state;
 
-struct editor_state *init_editor(FILE *); 
+struct editor_state * init_editor(FILE *file, char filename[256]);
 void destroy_editor(struct editor_state * state);
 
 
