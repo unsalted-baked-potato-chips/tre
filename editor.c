@@ -73,19 +73,18 @@ void update_window_after(struct editor_state*state){
     int startx, starty;
     startx=getcurx(state->win);
     starty=getcury(state->win);
-    int row =0 ;
     int y = state->current_line_n - state->view;
     
     struct line *draw_line = state->current_line;
     move(y,0);
     clrtobot();
     wclrtobot(state->win);
-    for(row = y; row < getmaxy(state->win) && draw_line; draw_line=draw_line->next, row++){
-        mvwaddstr(state->win, row, 0, draw_line->str);
-        mvprintw(row, 0, "%2d", row+state->view);
+    for(; y < getmaxy(state->win) && draw_line; draw_line=draw_line->next, y++){
+        mvwaddstr(state->win, y, 0, draw_line->str);
+        mvprintw(y, 0, "%2d", y+state->view);
     }
-    for(;row<getmaxy(state->win);row++)
-        mvaddch(row, 1, '~');
+    for(;y<getmaxy(state->win);y++)
+        mvaddch(y, 1, '~');
  
     wmove(state->win, starty, startx);
 }
@@ -147,7 +146,7 @@ int move_curs(struct editor_state *state, int x){
 void edit_delete_char(struct editor_state * state, int col){
     del_ch(state->current_line, col);
 
-    mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
+    mvwaddstr(state->win, state->current_line_n-state->view, 0, state->current_line->str);
     wclrtoeol(state->win);
     move_curs(state, col);
 
@@ -170,13 +169,11 @@ void edit_insert_nl(struct editor_state * state){
     refresh();
 }
 void edit_insert_char(struct editor_state * state, int ch, int curx){
-    if (isprint(ch)){
-        insert_ch(state->current_line, ch, curx);
-    }
-    mvwaddstr(state->win, state->current_line_n, 0, state->current_line->str);
+    if (!isprint(ch)) return;
+    insert_ch(state->current_line, ch, curx);
+    mvwaddstr(state->win, state->current_line_n-state->view, 0, state->current_line->str);
     wclrtoeol(state->win);
     move_curs(state, curx+1);
-
 }
 
 void editor(struct editor_state * state){
