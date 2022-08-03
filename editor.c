@@ -18,7 +18,7 @@ struct editor_state{
 };
 
 struct editor_state * init_editor(FILE *file){
-
+    ESCDELAY=0;
     fseek(file, 0, SEEK_END);
     long file_sz = ftell(file);
     rewind(file);
@@ -196,7 +196,6 @@ void editor(struct editor_state * state){
         curx = getcurx(state->win);
         cury = getcury(state->win);
         switch (input){
-            case KEY_END:
             case 27: //ESC
                 move(LINES-1, 0);//I dont know why getmaxy doesnt work here but LINES does
                 clrtoeol();
