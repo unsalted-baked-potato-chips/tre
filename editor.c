@@ -189,13 +189,26 @@ void edit_insert_char(struct editor_state * state, int ch, int curx){
 
 void editor(struct editor_state * state){
     int input;
-    int curx;
+    int curx, cury;
+    char buff[128];
     while(1) {
         input = wgetch(state->win);
         curx = getcurx(state->win);
+        cury = getcury(state->win);
         switch (input){
             case KEY_END:
-                return;
+            case 27: //ESC
+                move(LINES-1, 0);//I dont know why getmaxy doesnt work here but LINES does
+                clrtoeol();
+                echo();
+                getnstr(buff, 127);
+                noecho();
+                refresh();
+                if (!strcmp("q", buff)){
+                    return;
+                }
+                wmove(state->win, curx, cury);
+                break;
             case KEY_UP:
                 goto_prev(state, curx);
                 break;
