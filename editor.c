@@ -7,6 +7,16 @@
 #include "line.h"
 #include "editor.h"
 
+
+struct editor_state{
+    struct line *head;
+    struct line *current_line; 
+    ssize_t current_line_n;
+    ssize_t line_count;
+    ssize_t view;
+    WINDOW * win;
+};
+
 struct editor_state * init_editor(FILE *file){
 
     fseek(file, 0, SEEK_END);
@@ -18,6 +28,7 @@ struct editor_state * init_editor(FILE *file){
     initscr();
     cbreak();
     noecho();
+    nl();
     keypad(stdscr,1);
 
     struct editor_state *state = malloc(sizeof(struct editor_state));
