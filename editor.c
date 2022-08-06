@@ -19,19 +19,30 @@ struct editor_state{
 };
 
 struct editor_state * init_editor(FILE *file, char filename[256]){
+    long file_sz =0;
+    struct line *head = NULL;
     ESCDELAY=0;
-    fseek(file, 0, SEEK_END);
-    long file_sz = ftell(file);
-    rewind(file);
+    if (file){
+        flockfile(file);
+        fseek(file, 0, SEEK_END);
+        file_sz = ftell(file);
+        rewind(file);
+        head = read_lines(file,file_sz, NULL);
+        funlockfile(file);
+        fclose(file);
+    }else {
+        head = malloc(sizeof(struct line));
+        head->str = malloc(LINE_LEN_MIN);
+        head->max = LINE_LEN_MIN;
+        head->prev = NULL;
+        head->next = NULL;
 
-    struct line *head = read_lines(file,file_sz, NULL);
-
+    }
     initscr();
     cbreak();
     noecho();
     nl();
     keypad(stdscr,1);
-
     struct editor_state *state = malloc(sizeof(struct editor_state));
     state->current_line = head;
     state->head = head;

@@ -1,28 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-
+#include <errno.h>
 #include <curses.h>
 
 #include "editor.h"
 
 int main(int argc, char ** argv){
     FILE * file = NULL;
+    struct editor_state * editor_state = NULL;
 
-    if (argc == 1){
+    if (argc != 2){
         return 1;
     }
     file = fopen(argv[1], "r");
     if (!file){
-        return 1;
+        if ( errno == ENOENT){
+            file = NULL;
+        }else {
+            perror(NULL);
+            return 1;
+        }
     }
     
-    flockfile(file);
-
-    struct editor_state * editor_state = init_editor(file, argv[1]);
-    funlockfile(file);
-    fclose(file);
-    file = NULL;
+    editor_state = init_editor(file, argv[1]);
 
     editor(editor_state);
 
