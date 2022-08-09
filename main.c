@@ -30,11 +30,5 @@ int main(int argc, char ** argv){
     destroy_editor(editor_state);
     return 0;
 
-ERR_main:
-    funlockfile(file);
-    fclose(file);
-    destroy_editor(editor_state);
-    return 1;
-
 }
 
