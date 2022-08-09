@@ -1,5 +1,5 @@
 CFLAGS+=-std=c99 -Wall -Wpedantic
-LIBS?=-lcurses
+LIBS?=-lcurses -lm
 
 tre: main.c line.c editor.c line.h editor.h
 	cc $(CFLAGS) main.c line.c editor.c -o tre $(LIBS)

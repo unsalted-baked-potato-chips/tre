@@ -3,6 +3,7 @@
 #include <curses.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "line.h"
 #include "editor.h"
@@ -15,8 +16,15 @@ struct editor_state{
     ssize_t line_count;
     ssize_t view;
     char filename[256];
+    int line_nw;
     WINDOW * win;
 };
+
+int get_line_nw(struct editor_state * state){
+    int last = state->line_nw;
+    state->line_nw = ((int) log10(state->line_count))+2;
+    return last != state->line_nw;
+}
 
 struct editor_state * init_editor(FILE *file, char filename[256]){
     long file_sz =0;
@@ -38,23 +46,28 @@ struct editor_state * init_editor(FILE *file, char filename[256]){
         head->next = NULL;
 
     }
+
     initscr();
     cbreak();
     noecho();
     nl();
     keypad(stdscr,1);
+
     struct editor_state *state = malloc(sizeof(struct editor_state));
     state->current_line = head;
     state->head = head;
     state->view =0;
-    state->win = newwin(getmaxy(stdscr)-1, getmaxx(stdscr)-3, 0, 3);
-    keypad(state->win,1);
     state->current_line_n =0;
     state->line_count =0;
     strncpy(state->filename, filename, 255);
     state->filename[255]=0;
+    state->line_nw = 0;
+
     for (struct line *line = head; line; line=line->next)
         state->line_count++;
+    get_line_nw(state); 
+    state->win = newwin(getmaxy(stdscr)-1, getmaxx(stdscr)-state->line_nw, 0, state->line_nw);
+    keypad(state->win,1);
     wmove(state->win, 0,0);
     paint(state);
     return state;
@@ -83,11 +96,16 @@ void update_window(struct editor_state * state){
     move(0,0);
     clrtobot();
     wclrtobot(state->win);
+
+    if (get_line_nw(state)){
+        wresize(state->win, LINES-1,COLS-state->line_nw );
+        mvwin(state->win,0,state->line_nw);
+    }
     
     for(row = state->current_line_n, draw_line = state->current_line; row != state->view; row--, draw_line=draw_line->prev);
     for(row = 0; row < getmaxy(state->win) && draw_line; draw_line=draw_line->next, row++){
         mvwaddstr(state->win, row, 0, draw_line->str);
-        mvprintw(row, 0, "%2d", row+state->view);
+        mvprintw(row, 0, "%d", row+state->view);
     }
     for(;row<getmaxy(state->win);row++)
         mvaddch(row, 1, '~');
@@ -104,9 +122,15 @@ void update_window_after(struct editor_state*state){
     move(y,0);
     clrtobot();
     wclrtobot(state->win);
+
+    if (get_line_nw(state)){
+        wresize(state->win, LINES-1,COLS-state->line_nw );
+        mvwin(state->win,0,state->line_nw);
+    }
+    
     for(; y < getmaxy(state->win) && draw_line; draw_line=draw_line->next, y++){
         mvwaddstr(state->win, y, 0, draw_line->str);
-        mvprintw(y, 0, "%2d", y+state->view);
+        mvprintw(y, 0, "%d", y+state->view);
     }
     for(;y<getmaxy(state->win);y++)
         mvaddch(y, 1, '~');
