@@ -105,8 +105,6 @@ void paint(struct editor_state * state){
         endwin();
         refresh();
         clear();
-        state->do_resize=0;
-        state->line_nw = -1;//Can't decide if this is evil or not
     }
     update_window(state); 
     refresh();
@@ -120,9 +118,10 @@ void update_window(struct editor_state * state){
     clrtobot();
     wclrtobot(state->win);
 
-    if (get_line_nw(state)){
+    if (get_line_nw(state) || state->do_resize){
         wresize(state->win, LINES-1,COLS-state->line_nw );
         mvwin(state->win,0,state->line_nw);
+        state->do_resize =0;
     }
     
     for(row = state->current_line_n, draw_line = state->current_line; row != state->view; row--, draw_line=draw_line->prev);
