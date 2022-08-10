@@ -1,0 +1,5 @@
+Colorsrv: Send init request, contains all colors and their indices
+tre: every line draw, send colorsrv the line
+Colorsrv: send back the line as should be displayed with color escape sequences
+    Esc sequences: "\colorindex \\"
+tre: parse escape sequences and display
