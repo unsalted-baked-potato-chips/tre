@@ -10,6 +10,7 @@ char *cmds[]= {
 };
 
 int handle_cmd(char *cmd_str, struct editor_state * state){
+    if (!*cmd_str) return -1;
     int i;
     for (i=0; i<cmds_len; i++){
         if (!(strcmp(cmds[i], strtok(cmd_str, " ")))){

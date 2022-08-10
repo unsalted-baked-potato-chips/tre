@@ -251,6 +251,7 @@ void editor(struct editor_state * state){
     int input;
     int curx, cury;
     char buff[128];
+    buff[127]=0;
     while(1) {
         input = wgetch(state->win);
         curx = getcurx(state->win);
