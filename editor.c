@@ -18,6 +18,7 @@ struct editor_state{
     ssize_t view;
     char filename[256];
     int line_nw;
+    int do_resize;
     WINDOW * win;
 };
 
@@ -63,6 +64,7 @@ struct editor_state * init_editor(FILE *file, char filename[256]){
     strncpy(state->filename, filename, 255);
     state->filename[255]=0;
     state->line_nw = 0;
+    state->do_resize = 0;
 
     for (struct line *line = head; line; line=line->next)
         state->line_count++;
@@ -99,6 +101,13 @@ void destroy_editor(struct editor_state * state){
     free(state);
 }
 void paint(struct editor_state * state){
+    if (state->do_resize){
+        endwin();
+        refresh();
+        clear();
+        state->do_resize=0;
+        state->line_nw = -1;//Can't decide if this is evil or not
+    }
     update_window(state); 
     refresh();
     wrefresh(state->win);
@@ -280,7 +289,11 @@ void editor(struct editor_state * state){
             case KEY_ENTER:
             case '\n':
                 edit_insert_nl(state);
-               break;
+                break;
+            case KEY_RESIZE:
+                state->do_resize =1;
+                paint(state);
+                break;
             default:
                edit_insert_char(state, input, curx);
                break;
