@@ -205,7 +205,7 @@ int goto_line(struct editor_state * state, int line, int col){
 int move_curs(struct editor_state *state, int x){
     if(x<0){
         wmove(state->win, state->current_line_n-state->view, 0); 
-    }else if( x>strlen(state->current_line->str)){
+    }else if( x>=strlen(state->current_line->str)){
 
         wmove(state->win, state->current_line_n-state->view, strlen(state->current_line->str)); 
     }else {
@@ -224,11 +224,9 @@ void edit_delete_char(struct editor_state * state, int col){
 }
 void edit_delete_prev_line(struct editor_state * state){
     if(!state->current_line->prev) return;
-    del_nl(state->current_line);
-    state->current_line = NULL;
-
+    goto_prev(state, strlen(state->current_line->prev->str));
+    del_nl(state->current_line->next);
     state->line_count--;
-    goto_line(state, state->current_line_n-1, 0);
     update_window_after(state);
     refresh();
 }
