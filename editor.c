@@ -7,6 +7,7 @@
 
 #include "line.h"
 #include "editor.h"
+#include "cmd.h"
 
 
 struct editor_state{
@@ -72,11 +73,24 @@ struct editor_state * init_editor(FILE *file, char filename[256]){
     paint(state);
     return state;
 }
-void write_buffer(struct editor_state * state, FILE *file){
+int write_buffer(struct editor_state * state){
+    FILE * file;                
+    file = fopen(state->filename, "w");
+    if (!file){
+        return 1;
+    }
+
+    flockfile(file);
+
     for(struct line *curr = state->head; curr; curr=curr->next){
         fputs(curr->str, file);
         fputc('\n', file);
     } 
+
+    funlockfile(file);
+    fclose(file);
+    return 0;
+
 }
 void destroy_editor(struct editor_state * state){
     destroy_line_buffer(state->head);
@@ -241,23 +255,7 @@ void editor(struct editor_state * state){
                 getnstr(buff, 127);
                 noecho();
                 refresh();
-                if (!strcmp("q", buff)){
-                    return;
-                }else if (!strcmp("w", buff)){
-                    FILE * file;                
-                    file = fopen(state->filename, "w");
-                    if (!file){
-                        break;
-                    }
-
-                    flockfile(file);
-
-                    write_buffer(state, file);
-
-                    funlockfile(file);
-                    fclose(file);
-
-                }
+                if (handle_cmd(buff, state)== 0) return; 
                 wmove(state->win, curx, cury);
                 break;
             case KEY_UP:

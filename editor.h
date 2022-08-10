@@ -10,7 +10,7 @@ struct editor_state * init_editor(FILE *file, char filename[256]);
 void destroy_editor(struct editor_state * state);
 
 
-void write_buffer(struct editor_state * state, FILE *file);
+int write_buffer(struct editor_state * state);
 
 void editor(struct editor_state *);
 void update_window_after(struct editor_state*state);
