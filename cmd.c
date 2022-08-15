@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "editor.h"
+#include "editor_ctrl.h"
 
 size_t cmds_len = 2;
 char *cmds[]= {

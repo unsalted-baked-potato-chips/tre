@@ -1,5 +1,0 @@
-Keep line functions out of scope of main
-refactor all inputs into individual functions
-implement command system -> new exit and save inputs
-actually test for memory leaks
-
