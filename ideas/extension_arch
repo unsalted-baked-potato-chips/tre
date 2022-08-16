@@ -1,19 +1,12 @@
 Extensions can:
-    Hijack input
     Hijack display
     Define commands
     Define macros
     Execute commands
-    Set Vars
 
 Hijacks:
     The extensions can insert themselves as a sort of man in the middle
     Only one hijacker can be registered to a type at once
-    
-    Hijack input
-        Extension will recieve new letter input, current line and position
-        Sends back the the line and new position of cursor as it should be written
-        Ideally cannot execute commands during this time (Mutex lock perhaps)
 
     Hijack display
         Extension will recieve the line, line position
@@ -24,15 +17,15 @@ Define Text Command:
     Will define new command to act on selection
     Recieves selection on command execution
     Sends back edited selection
-
-Define Macro:
-    Defines a text substitution for a sequence of commands
     Does not require a second daemonized process. (Can be just a curl call at startup)
 
-Vars:
-   Not sure if this will stay. Might just be env vars. Might not exist at all.
-   Things like tab character length, line buffer before start scrolling
-   Does not need daemon.
+Define Input Macro:
+    Defines a text substitution for a single key input
+    Does not require a second daemonized process. (Can be just a curl call at startup)
+
+Define Command Macro:
+    Defines a text substitution for a sequence of commands
+    Does not require a second daemonized process. (Can be just a curl call at startup)
 
 Predefined Commands:
     q:
