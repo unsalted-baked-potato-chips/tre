@@ -31,6 +31,7 @@ struct editor_state * init_editor(FILE *file, char filename[256]){
     }else {
         head = malloc(sizeof(struct line));
         head->str = malloc(LINE_LEN_MIN);
+        head->str[0] =0;
         head->max = LINE_LEN_MIN;
         head->prev = NULL;
         head->next = NULL;
@@ -111,15 +112,17 @@ void update_window_after(struct editor_state*state){
     int y = state->current_line_n - state->view;
     
     struct line *draw_line = state->current_line;
-    move(y,0);
-    clrtobot();
-    wclrtobot(state->win);
-
     if (get_line_nw(state)){
         wresize(state->win, LINES-1,COLS-state->line_nw );
         mvwin(state->win,0,state->line_nw);
+        update_window(state);
+        return;
     }
-    
+     move(y,0);
+    clrtobot();
+    wclrtobot(state->win);
+
+   
     for(; y < getmaxy(state->win) && draw_line; draw_line=draw_line->next, y++){
         mvwaddstr(state->win, y, 0, draw_line->str);
         mvprintw(y, 0, "%d", y+state->view);
