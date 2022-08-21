@@ -30,7 +30,15 @@ struct editor_state * init_editor(FILE *file, char filename[256]){
         fclose(file);
     }else {
         head = malloc(sizeof(struct line));
+        if (!head) {
+            fputs("Failed to allocate memory", stderr);
+            exit(1);
+        }
         head->str = malloc(LINE_LEN_MIN);
+        if (!head->str) {
+            fputs("Failed to allocate memory", stderr);
+            exit(1);
+        }
         head->str[0] =0;
         head->max = LINE_LEN_MIN;
         head->prev = NULL;
@@ -45,6 +53,10 @@ struct editor_state * init_editor(FILE *file, char filename[256]){
     keypad(stdscr,1);
 
     struct editor_state *state = malloc(sizeof(struct editor_state));
+    if (!state){
+        fputs("Failed to allocate memory", stderr);
+        exit(1);
+    }
     state->current_line = head;
     state->head = head;
     state->view =0;
