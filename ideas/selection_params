@@ -1,0 +1,28 @@
+
+"v" visual
+"w" word
+"$" EOL
+"." Everything
+"0" Null selection
+"~NUM" NUM lines from cursor
+"NUM" NUM'th line
+"NUM_A-NUM_B" range of lines from line NUM_A to line NUM_B
+"iDELIM"  text inside DELIM delimiter
+
+example:
+    ! #i" sed s/ /_/g
+        Effectively replaces all occurences of space between double quotes that the cursor is between
+        select all text between double quotes from point of cursor, pipe it into sed and replace it with the output of sed
+    d 5-9
+        Assuming there is an extension that defines the d command as a deletion
+        delete lines 5 through 9
+    ~ ~3
+        Assuming there is an extension that defines the ~ command as a change case
+        Change case for the next 3 lines
+    y $
+        Assuming there is an extension that defines the y command as a yank/snarf
+        Yank/snarf all text from the cursor to the end of the line
+    p v
+        Assuming there is an extension that defines the p command as a put/paste to accompany yank/snarf
+        Put/paste whatever is in the snarf buffer the the place of the user selected text
+

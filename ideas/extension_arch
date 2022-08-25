@@ -34,7 +34,7 @@ Predefined Commands:
         Write to file
     e filename:
         Edit file
-    ! command [args] [< selection]:
+    !  [#selection] command [args]:
         Send selection to stdin of command
         Replace selection with stdout of command
 
