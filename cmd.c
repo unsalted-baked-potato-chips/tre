@@ -10,10 +10,12 @@ char *cmds[]= {
 };
 
 int handle_cmd(char *cmd_str, struct editor_state * state){
-    if (!*cmd_str) return -1;
     int i;
+    char * argv;
+    if (!*cmd_str) return -1;
+    argv = strtok(cmd_str, " ");
     for (i=0; i<cmds_len; i++){
-        if (!(strcmp(cmds[i], strtok(cmd_str, " ")))){
+        if (!(strcmp(cmds[i], argv))){
             break;
         }
     }
@@ -21,7 +23,13 @@ int handle_cmd(char *cmd_str, struct editor_state * state){
         case 0:
             break;
         case 1:
+            argv = strtok(NULL, " ");
+            if (argv){
+                strncpy(state->filename, argv, 255);
+                state->filename[255]=0;
+            }
             write_buffer(state);
+            break;
         default:
             i= -1;
     }
