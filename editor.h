@@ -14,10 +14,11 @@ struct editor_state{
     int line_nw;
     int do_resize;
     WINDOW * win;
+    struct editor_state ** self;
 };
 
 
-struct editor_state * init_editor(FILE *file, char filename[256]);
+struct editor_state * init_editor(FILE *file, char filename[256], struct editor_state **self);
 void update_window(struct editor_state * state); 
 void destroy_editor(struct editor_state * state);
 

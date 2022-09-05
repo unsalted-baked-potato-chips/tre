@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "editor_ctrl.h"
 
 size_t cmds_len = 2;
 char *cmds[]= {
     "q",
-    "w"
+    "w",
+    "e"
 };
 
 int handle_cmd(char *cmd_str, struct editor_state * state){
@@ -19,17 +21,36 @@ int handle_cmd(char *cmd_str, struct editor_state * state){
             break;
         }
     }
+    argv = strtok(NULL, " ");
     switch (i){
         case 0:
             break;
         case 1:
-            argv = strtok(NULL, " ");
             if (argv){
                 strncpy(state->filename, argv, 255);
                 state->filename[255]=0;
             }
             write_buffer(state);
             break;
+        case 2:
+            if(argv){
+                struct editor_state ** editor_ref  =state->self;
+                FILE * file;
+                argv[255] =0;
+                file = fopen(argv, "r");
+                if (!file){
+                    if ( errno == ENOENT){
+                        file = NULL;
+                    }else {
+                        //TODO:debug printing
+                        break;
+                    }
+                }
+                destroy_editor(state);
+                //TODO: handle argv better. Expects a char[256] recieves char *
+                *editor_ref = init_editor(file, argv, editor_ref);
+            }
+
         default:
             i= -1;
     }

@@ -23,7 +23,7 @@ int main(int argc, char ** argv){
         }
     }
     
-    editor_state = init_editor(file, argv[1]);
+    editor_state = init_editor(file, argv[1], &editor_state);
 
     editor(editor_state);
 

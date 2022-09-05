@@ -16,7 +16,7 @@ int get_line_nw(struct editor_state * state){
     return last != state->line_nw;
 }
 
-struct editor_state * init_editor(FILE *file, char filename[256]){
+struct editor_state * init_editor(FILE *file, char filename[256], struct editor_state ** self){
     long file_sz =0;
     struct line *head = NULL;
     ESCDELAY=0;
@@ -66,6 +66,7 @@ struct editor_state * init_editor(FILE *file, char filename[256]){
     state->filename[255]=0;
     state->line_nw = 0;
     state->do_resize = 0;
+    state->self = self;
 
     for (struct line *line = head; line; line=line->next)
         state->line_count++;
@@ -161,6 +162,7 @@ void update_view(struct editor_state *state){
 void editor(struct editor_state * state){
     int input;
     int curx, cury;
+    struct editor_state ** state_ref = state->self;
     char buff[128];
     buff[127]=0;
     while(1) {
@@ -176,6 +178,7 @@ void editor(struct editor_state * state){
                 noecho();
                 refresh();
                 if (handle_cmd(buff, state)== 0) return; 
+                state = *state_ref;
                 wmove(state->win, curx, cury);
                 break;
             case KEY_UP:
