@@ -98,6 +98,8 @@ void add_line(struct editor_state * state, struct line * line, int row){
     char * cpy = strdup(line->str);
     char * tok;
     tok = strtok(cpy, "\t");
+    wmove(state->win, row, 0);
+    wclrtoeol(state->win);
     for (;;){
         if (!tok) break;
         mvwaddstr(state->win, row, chtocol(line, tok-cpy), tok);

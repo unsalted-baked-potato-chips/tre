@@ -69,7 +69,7 @@ int move_curs(struct editor_state *state, int x){
 void edit_delete_char(struct editor_state * state, int col){
     del_ch(state->current_line, col);
 
-    mvwaddstr(state->win, state->current_line_n-state->view, 0, state->current_line->str);
+    add_line(state, state->current_line, state->current_line_n-state->view);
     wclrtoeol(state->win);
     move_curs(state, col);
 
