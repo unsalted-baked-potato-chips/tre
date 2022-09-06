@@ -111,7 +111,7 @@ void update_window(struct editor_state * state){
     for(row = state->current_line_n, draw_line = state->current_line; row != state->view; row--, draw_line=draw_line->prev);
     for(row = 0; row < getmaxy(state->win) && draw_line; draw_line=draw_line->next, row++){
         mvwaddstr(state->win, row, 0, draw_line->str);
-        mvprintw(row, 0, "%d", row+state->view);
+        mvprintw(row, 0, "%d", row+state->view+1);
     }
     for(;row<getmaxy(state->win);row++)
         mvaddch(row, 1, '~');
@@ -138,7 +138,7 @@ void update_window_after(struct editor_state*state){
    
     for(; y < getmaxy(state->win) && draw_line; draw_line=draw_line->next, y++){
         mvwaddstr(state->win, y, 0, draw_line->str);
-        mvprintw(y, 0, "%d", y+state->view);
+        mvprintw(y, 0, "%d", y+state->view+1);
     }
     for(;y<getmaxy(state->win);y++)
         mvaddch(y, 1, '~');
