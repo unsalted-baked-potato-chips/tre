@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #define LINE_LEN_MIN 50
+#define DEFAULT_TABSIZE 4
 
 
 struct line {

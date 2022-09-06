@@ -71,7 +71,12 @@ int coltoch(struct line * line, int col){
         if (line->str[ch] == '\t'){
             //TODO
             //Make TABSIZE part of a config
-            curr_col +=TABSIZE;
+            if (getenv("TABSIZE")){
+                curr_col += atoi(getenv("TABSIZE"));
+            }else{
+
+                curr_col+=DEFAULT_TABSIZE;
+            }
         }else{
             curr_col++;
         }   
@@ -85,7 +90,14 @@ int chtocol(struct line * line, int chn){
         //replace with a LUT thats appendable by display server
         //table of char -> charwidth
         if (line->str[i] == '\t'){
-            col +=TABSIZE;
+
+            //TODO
+            //Make TABSIZE part of a config
+            if (getenv("TABSIZE")){
+                col += atoi(getenv("TABSIZE"));
+            }else{
+                col+=DEFAULT_TABSIZE;
+            }
         }else {
             col++;
         }
