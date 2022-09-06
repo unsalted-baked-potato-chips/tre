@@ -69,6 +69,8 @@ int coltoch(struct line * line, int col){
         //replace with a LUT thats appendable by display server
         //table of char -> charwidth
         if (line->str[ch] == '\t'){
+            //TODO
+            //Make TABSIZE part of a config
             curr_col +=TABSIZE;
         }else{
             curr_col++;
