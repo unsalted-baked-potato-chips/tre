@@ -47,9 +47,9 @@ int handle_cmd(char *cmd_str, struct editor_state * state){
                     }
                 }
                 destroy_editor(state);
-                //TODO: handle argv better. Expects a char[256] recieves char *
                 *editor_ref = init_editor(file, argv, editor_ref);
             }
+            break;
 
         default:
             i= -1;
