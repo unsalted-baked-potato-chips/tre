@@ -24,5 +24,7 @@ int del_ch(struct line * , size_t );
 int del_nl(struct line *);
 int insert_nl(struct line *, int);
 int append_nl(struct line *);
+int chtocol(struct line * line, int chn);
+int coltoch(struct line * line, int col);
 
 #endif /* LINE_H */

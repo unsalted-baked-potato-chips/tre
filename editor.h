@@ -28,4 +28,5 @@ void update_window(struct editor_state * state);
 void update_view(struct editor_state *state);
 void paint(struct editor_state * state);
 
+void add_line(struct editor_state * state, struct line * line, int row);
 #endif /* EDITOR_H */

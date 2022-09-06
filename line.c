@@ -61,6 +61,36 @@ int del_ch(struct line * line, size_t pos){
     return 0;
 }
 
+int coltoch(struct line * line, int col){
+    int curr_col = 0;
+    int ch = 0;
+    for (; curr_col<col; ch++){
+        //TODO
+        //replace with a LUT thats appendable by display server
+        //table of char -> charwidth
+        if (line->str[ch] == '\t'){
+            curr_col +=TABSIZE;
+        }else{
+            curr_col++;
+        }   
+    }
+    return ch;
+}
+int chtocol(struct line * line, int chn){
+    int col =0;
+    for (size_t i = 0; i<chn; i++){
+        //TODO
+        //replace with a LUT thats appendable by display server
+        //table of char -> charwidth
+        if (line->str[i] == '\t'){
+            col +=TABSIZE;
+        }else {
+            col++;
+        }
+    }
+    return col;
+}
+
 int del_nl(struct line *line){
     if (!line->prev) return 0;
     const size_t sz =strlen(line->str)+strlen(line->prev->str)+1;

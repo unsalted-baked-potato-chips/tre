@@ -59,9 +59,9 @@ int move_curs(struct editor_state *state, int x){
         wmove(state->win, state->current_line_n-state->view, 0); 
     }else if( x>=strlen(state->current_line->str)){
 
-        wmove(state->win, state->current_line_n-state->view, strlen(state->current_line->str)); 
+        wmove(state->win, state->current_line_n-state->view, chtocol(state->current_line,strlen(state->current_line->str))); 
     }else {
-        wmove(state->win, state->current_line_n-state->view, x); 
+        wmove(state->win, state->current_line_n-state->view, chtocol(state->current_line, x)); 
     }
     return 0;
 }
@@ -90,9 +90,12 @@ void edit_insert_nl(struct editor_state * state){
     refresh();
 }
 void edit_insert_char(struct editor_state * state, int ch, int curx){
-    if (!isprint(ch)) return;
+    if (!isprint(ch) && ch != '\t') return;
     insert_ch(state->current_line, ch, curx);
-    mvwaddstr(state->win, state->current_line_n-state->view, 0, state->current_line->str);
+    wmove(state->win, state->current_line_n-state->view, 0);
+    wclrtoeol(state->win);
+    //mvwaddstr(state->win, state->current_line_n-state->view, 0, state->current_line->str);
+    add_line(state, state->current_line, state->current_line_n-state->view);
     wclrtoeol(state->win);
     move_curs(state, curx+1);
 }

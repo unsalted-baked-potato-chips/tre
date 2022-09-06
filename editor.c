@@ -94,6 +94,17 @@ void paint(struct editor_state * state){
     refresh();
     wrefresh(state->win);
 }
+void add_line(struct editor_state * state, struct line * line, int row){
+    char * cpy = strdup(line->str);
+    char * tok;
+    tok = strtok(cpy, "\t");
+    for (;;){
+        if (!tok) break;
+        mvwaddstr(state->win, row, chtocol(line, tok-cpy), tok);
+        tok = strtok(NULL, "\t");
+    }
+    free(cpy);
+}
 void update_window(struct editor_state * state){ 
     int row;
     struct line * draw_line;
@@ -110,7 +121,8 @@ void update_window(struct editor_state * state){
     
     for(row = state->current_line_n, draw_line = state->current_line; row != state->view; row--, draw_line=draw_line->prev);
     for(row = 0; row < getmaxy(state->win) && draw_line; draw_line=draw_line->next, row++){
-        mvwaddstr(state->win, row, 0, draw_line->str);
+        //mvwaddstr(state->win, row, 0, draw_line->str);
+        add_line(state, draw_line, row);
         mvprintw(row, 0, "%d", row+state->view+1);
     }
     for(;row<getmaxy(state->win);row++)
@@ -137,7 +149,8 @@ void update_window_after(struct editor_state*state){
 
    
     for(; y < getmaxy(state->win) && draw_line; draw_line=draw_line->next, y++){
-        mvwaddstr(state->win, y, 0, draw_line->str);
+        //mvwaddstr(state->win, y, 0, draw_line->str);
+        add_line(state, draw_line, y);
         mvprintw(y, 0, "%d", y+state->view+1);
     }
     for(;y<getmaxy(state->win);y++)
@@ -167,7 +180,7 @@ void editor(struct editor_state * state){
     buff[127]=0;
     while(1) {
         input = wgetch(state->win);
-        curx = getcurx(state->win);
+        curx = coltoch(state->current_line,getcurx(state->win));
         cury = getcury(state->win);
         switch (input){
             case 27: //ESC
@@ -179,7 +192,7 @@ void editor(struct editor_state * state){
                 refresh();
                 if (handle_cmd(buff, state)== 0) return; 
                 state = *state_ref;
-                wmove(state->win, curx, cury);
+                move_curs(state, curx);
                 break;
             case KEY_UP:
                 goto_prev(state, curx);
@@ -208,6 +221,8 @@ void editor(struct editor_state * state){
                 state->do_resize =1;
                 paint(state);
                 break;
+            case KEY_STAB:
+                input = '\t';
             default:
                edit_insert_char(state, input, curx);
                break;
