@@ -209,6 +209,7 @@ void editor(struct editor_state * state){
                 move_curs(state, curx-1);
                 break;
             case KEY_BACKSPACE:
+            case 127:
                 if (curx==0) {
                     edit_delete_prev_line(state);
                     break;
