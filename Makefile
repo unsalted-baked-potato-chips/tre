@@ -1,4 +1,4 @@
-CFLAGS+=-std=c99 -Wall -Wpedantic
+CFLAGS+=-std=c99 -Wall -Wpedantic -D_XOPEN_SOURCE=700
 LIBS?=-lcurses -lm
 
 tre: main.c line.c editor.c editor_ctrl.c cmd.c cmd.h line.h editor.h
