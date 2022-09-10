@@ -10,6 +10,7 @@ struct editor_state{
     ssize_t current_line_n;
     ssize_t line_count;
     ssize_t view;
+    int current_ch;
     char filename[256];
     int line_nw;
     int do_resize;

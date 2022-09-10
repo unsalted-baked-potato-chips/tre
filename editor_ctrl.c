@@ -25,53 +25,57 @@ int write_buffer(struct editor_state * state){
     return 0;
 
 }
-int goto_prev(struct editor_state *state, int col){
+int goto_prev(struct editor_state *state, int ch){
     if (!state->current_line->prev) return 1;
     state->current_line_n--;
     state->current_line = state->current_line->prev;
-    move_curs(state, col);
+    move_curs(state, ch);
     update_view(state);
     return 0;
 }
 
-int goto_next(struct editor_state *state, int col){
+int goto_next(struct editor_state *state, int ch){
     if (!state->current_line->next) return 1;
     state->current_line_n++;
     state->current_line = state->current_line->next;
-    move_curs(state, col);
+    move_curs(state, ch);
     update_view(state);
     return 0;
 }
 
-int goto_line(struct editor_state * state, int line, int col){
+int goto_line(struct editor_state * state, int line, int ch){
     if (line <0 || line>=state->line_count) return 1;
     state->current_line_n = line;
     
     int i =0;
     for (state->current_line = state->head; i<line; i++, state->current_line=state->current_line->next);
-    move_curs(state, col);
+    move_curs(state, ch);
     update_view(state);
     return 0;
 }
 
-int move_curs(struct editor_state *state, int x){
-    if(x<0){
-        wmove(state->win, state->current_line_n-state->view, 0); 
-    }else if( x>=strlen(state->current_line->str)){
-
-        wmove(state->win, state->current_line_n-state->view, chtocol(state->current_line,strlen(state->current_line->str))); 
-    }else {
-        wmove(state->win, state->current_line_n-state->view, chtocol(state->current_line, x)); 
+int move_curs(struct editor_state *state, int ch){
+    if(ch<0){
+        state->current_ch = 0;
+    }else{
+        int len = strlen(state->current_line->str);
+        if( ch>=len){
+            state->current_ch = len;
+        }
+        else {
+            state->current_ch = ch;
+        }
     }
+    wmove(state->win, state->current_line_n-state->view, chtocol(state->current_line, state->current_ch)); 
     return 0;
 }
 
-void edit_delete_char(struct editor_state * state, int col){
-    del_ch(state->current_line, col);
+void edit_delete_char(struct editor_state * state, int ch){
+    del_ch(state->current_line, ch);
 
     add_line(state, state->current_line, state->current_line_n-state->view);
     wclrtoeol(state->win);
-    move_curs(state, col);
+    move_curs(state, ch);
 
 }
 void edit_delete_prev_line(struct editor_state * state){
@@ -83,7 +87,7 @@ void edit_delete_prev_line(struct editor_state * state){
     refresh();
 }
 void edit_insert_nl(struct editor_state * state){
-    insert_nl(state->current_line, coltoch(state->current_line, getcurx(state->win)));
+    insert_nl(state->current_line, state->current_ch);//coltoch(state->current_line, getcurx(state->win)));
     state->line_count++;
     update_window_after(state);
     goto_next(state, 0); 
