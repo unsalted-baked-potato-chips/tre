@@ -83,7 +83,7 @@ void edit_delete_prev_line(struct editor_state * state){
     refresh();
 }
 void edit_insert_nl(struct editor_state * state){
-    insert_nl(state->current_line, getcurx(state->win));
+    insert_nl(state->current_line, coltoch(state->current_line, getcurx(state->win)));
     state->line_count++;
     update_window_after(state);
     goto_next(state, 0); 
