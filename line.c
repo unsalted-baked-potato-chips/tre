@@ -37,9 +37,11 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
 
 void destroy_line_buffer(struct line *head){
     for (; head->next; head=head->next){
+        free(head->prev->str);
         free(head->prev);
         head->prev = NULL;
     }
+    free(head->str);
     free(head);
 }
 int insert_ch(struct line * line, char ch, size_t pos){
