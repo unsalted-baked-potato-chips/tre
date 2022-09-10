@@ -87,7 +87,7 @@ void edit_delete_prev_line(struct editor_state * state){
     refresh();
 }
 void edit_insert_nl(struct editor_state * state){
-    insert_nl(state->current_line, state->current_ch);//coltoch(state->current_line, getcurx(state->win)));
+    insert_nl(state->current_line, state->current_ch);
     state->line_count++;
     update_window_after(state);
     goto_next(state, 0); 
@@ -98,7 +98,6 @@ void edit_insert_char(struct editor_state * state, int ch, int curx){
     insert_ch(state->current_line, ch, curx);
     wmove(state->win, state->current_line_n-state->view, 0);
     wclrtoeol(state->win);
-    //mvwaddstr(state->win, state->current_line_n-state->view, 0, state->current_line->str);
     add_line(state, state->current_line, state->current_line_n-state->view);
     wclrtoeol(state->win);
     move_curs(state, curx+1);

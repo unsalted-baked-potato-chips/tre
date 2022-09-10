@@ -176,16 +176,14 @@ void update_view(struct editor_state *state){
 }
 void editor(struct editor_state * state){
     int input;
-    int curx, cury;
     struct editor_state ** state_ref = state->self;
     char buff[128];
     buff[127]=0;
     while(1) {
         input = wgetch(state->win);
-        curx = coltoch(state->current_line,getcurx(state->win));
-        cury = getcury(state->win);
         switch (input){
             case 27: //ESC
+                //TODO: make a function
                 move(LINES-1, 0);//I dont know why getmaxy doesnt work here but LINES does
                 clrtoeol();
                 echo();
@@ -194,27 +192,27 @@ void editor(struct editor_state * state){
                 refresh();
                 if (handle_cmd(buff, state)== 0) return; 
                 state = *state_ref;
-                move_curs(state, curx);
+                move_curs(state, state->current_ch);
                 break;
             case KEY_UP:
-                goto_prev(state, curx);
+                goto_prev(state, state->current_ch);
                 break;
             case KEY_DOWN:
-                goto_next(state, curx);
+                goto_next(state, state->current_ch);
                 break;
             case KEY_RIGHT:
-                move_curs(state, curx+1);
+                move_curs(state, state->current_ch+1);
                 break;
             case KEY_LEFT:
-                move_curs(state, curx-1);
+                move_curs(state, state->current_ch-1);
                 break;
             case KEY_BACKSPACE:
             case 127:
-                if (curx==0) {
+                if (state->current_ch==0) {
                     edit_delete_prev_line(state);
                     break;
                 }
-                edit_delete_char(state, curx-1);
+                edit_delete_char(state, state->current_ch-1);
                 break;
             case KEY_ENTER:
             case '\n':
@@ -227,7 +225,7 @@ void editor(struct editor_state * state){
             case KEY_STAB:
                 input = '\t';
             default:
-               edit_insert_char(state, input, curx);
+               edit_insert_char(state, input, state->current_ch);
                break;
        }
         wrefresh(state->win);
