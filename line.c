@@ -36,7 +36,8 @@ struct line * read_lines(FILE * file, size_t file_sz, struct line * prev){
 }
 
 void destroy_line_buffer(struct line *head){
-    for (; head->next; head=head->next){
+    for (; head->next;){
+        head=head->next;
         free(head->prev->str);
         free(head->prev);
         head->prev = NULL;
